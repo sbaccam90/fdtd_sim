@@ -1,0 +1,23 @@
+#ifndef _FDTD_PROTO1_H
+#define _FDTD_PROTO1_H
+3
+4
+#include "fdtd-grid1.h"
+5
+6
+7
+/* Function prototypes */
+void gridInit(Grid *g);
+8
+9
+10
+void snapshotInit2d(Grid *g);
+void snapshot2d(Grid *g);
+11
+12
+13
+void updateE2d(Grid *g);
+void updateH2d(Grid *g);
+14
+15
+#endif

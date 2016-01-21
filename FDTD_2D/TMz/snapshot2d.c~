@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "fdtd-macro-tmz.h"
+4
+5
+6
+7
+8
+static int temporalStride = -2, frame = 0, startTime,
+startNodeX, endNodeX, spatialStrideX,
+startNodeY, endNodeY, spatialStrideY;
+static char basename[80];
+9
+10
+void snapshotInit2d(Grid *g) {
+11
+12
+int choice;
+13
+14
+15
+16
+17
+18
+19
+printf("Do you want 2D snapshots? (1=yes, 0=no) ");
+scanf("%d", &choice);
+if (choice == 0) {
+temporalStride = -1;
+return;
+}
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+printf("Duration of simulation is %d steps.\n", MaxTime);
+printf("Enter start time and temporal stride: ");
+scanf(" %d %d", &startTime, &temporalStride);
+printf("In x direction grid has %d total nodes"
+" (ranging from 0 to %d).\n", SizeX, SizeX - 1);
+printf("Enter first node, last node, and spatial stride: ");
+scanf(" %d %d %d", &startNodeX, &endNodeX, &spatialStrideX);
+printf("In y direction grid has %d total nodes"
+" (ranging from 0 to %d).\n", SizeY, SizeY - 1);
+printf("Enter first node, last node, and spatial stride: ");
+scanf(" %d %d %d", &startNodeY, &endNodeY, &spatialStrideY);
+printf("Enter the base name: ");
+scanf(" %s", basename);200
+CHAPTER 8. TWO-DIMENSIONAL FDTD SIMULATIONS
+34
+return;
+35
+36
+}
+37
+38
+39
+40
+41
+42
+void snapshot2d(Grid *g) {
+int mm, nn;
+float dim1, dim2, temp;
+char filename[100];
+FILE *out;
+43
+/* ensure temporal stride set to a reasonable value */
+if (temporalStride == -1) {
+return;
+} if (temporalStride < -1) {
+fprintf(stderr,
+"snapshot2d: snapshotInit2d must be called before snapshot.\n"
+"
+Temporal stride must be set to positive value.\n");
+exit(-1);
+}
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+/* get snapshot if temporal conditions met */
+if (Time >= startTime &&
+(Time - startTime) % temporalStride == 0) {
+sprintf(filename, "%s.%d", basename, frame++);
+out = fopen(filename, "wb");
+54
+55
+56
+57
+58
+59
+/* write dimensions to output file --
+* express dimensions as floats */
+dim1 = (endNodeX - startNodeX) / spatialStrideX + 1;
+dim2 = (endNodeY - startNodeY) / spatialStrideY + 1;
+fwrite(&dim1, sizeof(float), 1, out);
+fwrite(&dim2, sizeof(float), 1, out);
+60
+61
+62
+63
+64
+65
+66
+/* write remaining data */
+for (nn = endNodeY; nn >= startNodeY; nn -= spatialStrideY)
+for (mm = startNodeX; mm <= endNodeX; mm += spatialStrideX) {
+temp = (float)Ez(mm, nn); // store data as a float
+fwrite(&temp, sizeof(float), 1, out); // write the float
+}
+67
+68
+69
+70
+71
+72
+73
+fclose(out);
+74
+// close file
+}
+75
+76
+return;
+77
+78
+}

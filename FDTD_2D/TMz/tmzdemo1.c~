@@ -1,0 +1,56 @@
+/* TMz simulation with Ricker source at center of grid. */
+2
+3
+4
+5
+6
+#include
+#include
+#include
+#include
+"fdtd-alloc1.h"
+"fdtd-macro-tmz.h"
+"fdtd-proto1.h"
+"ezinc.h"
+7
+8
+9
+10
+int main()
+{
+Grid *g;
+11
+ALLOC_1D(g, 1, Grid); // allocate memory for Grid
+12
+13
+gridInit(g);
+ezIncInit(g);
+snapshotInit2d(g);
+14
+15
+16
+// initialize the grid
+// initialize snapshots
+17
+/* do time stepping */
+for (Time = 0; Time < MaxTime; Time++) {
+updateH2d(g);
+// update magnetic field
+updateE2d(g);
+// update electric field
+Ez(SizeX / 2, SizeY / 2) = ezInc(Time, 0.0); // add a source
+snapshot2d(g);
+// take a snapshot (if appropriate)
+} // end of time-stepping
+18
+19
+20
+21
+22
+23
+24
+25
+return 0;
+26
+27
+}
